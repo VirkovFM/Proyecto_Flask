@@ -9,3 +9,11 @@ El cual hara que a la izquierda del cmd deba decir algo asi: (nameArchivo)(base)
 6.-Una vez en la url procedemos a ejecutar el siguiente comando: flask --app main.py run
 
 NOTA: Si algo no funciona es porque igual y no se creo los scripts de arranque del punto 3
+
+
+PARA EL HTML:
+Variable {{}}
+    {{lat}}
+    {{long}}
+
+Plantilla {% plantilla (if, for) %}

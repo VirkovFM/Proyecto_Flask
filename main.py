@@ -22,3 +22,21 @@ def proyectos(nombre = None, edad = 0):
         return render_template('proyectos.html')
     else:
         return render_template('proyectos.html',edad = edad, nombre = nombre)
+    
+
+@app.route('/loops')
+def loops():
+    lista = ["Frutas","Verdurass","Limpieza","Abarrotes"]
+    return render_template('loops.html',lista = lista)  #El lista antes de lista es la variable del html
+
+
+@app.route('/mapa/<float:lat>/<float(signed=True):long>/<string:nombre>',methods=['GET'])
+def mapa(lat,long,nombre):
+    markers=[
+   {
+   'lat':lat,
+   'lon':long,
+   'popup':nombre
+    }
+   ]
+    return render_template('mapa.html',lat=lat,long=long,markers=markers)
