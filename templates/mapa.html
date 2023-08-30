@@ -21,8 +21,16 @@
     <script>
         {% for marker in markers %}
         L.marker([{{ marker['lat'] }}, {{ marker['lon'] }}]).addTo(map)
-            .bindPopup("{{ marker['popup'] }}")
+        .bindPopup("Latitud: {{ marker['lat'] }}<br>Longitud: {{ marker['lon'] }}<br>Zoom: {{ marker['zoom'] }}<br>Tamaño del mapa: {{ marker['sizemap'] }}<br>Contenido del popup: {{ marker['popup'] }}")
             .openPopup();
+
+            var newZoom = {{ marker['zoom'] }}; // Aquí define el nuevo valor de zoom que deseas
+            map.setZoom(newZoom);
+
+            var mapElement = document.getElementById('map');
+            mapElement.style.height = "{{ marker['sizemap'] }}px"; // Por ejemplo: '800px'
+            mapElement.style.width = "{{ marker['sizemaps'] }}px"; // Por ejemplo: '800px'
+
         {% endfor %}
     </script>
 </body>

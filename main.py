@@ -30,12 +30,15 @@ def loops():
     return render_template('loops.html',lista = lista)  #El lista antes de lista es la variable del html
 
 
-@app.route('/mapa/<float:lat>/<float(signed=True):long>/<string:nombre>',methods=['GET'])
-def mapa(lat,long,nombre):
+@app.route('/mapa/<float:lat>/<float(signed=True):long>/<float(signed=True):zoom>/<float(signed=True):sizemap>/<float(signed=True):sizemaps>/<string:nombre>',methods=['GET'])
+def mapa(lat,long,zoom,sizemap,sizemaps,nombre):
     markers=[
    {
    'lat':lat,
    'lon':long,
+   'zoom':zoom,
+   'sizemap':sizemap,
+   'sizemaps':sizemaps,
    'popup':nombre
     }
    ]
