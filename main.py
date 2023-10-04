@@ -6,7 +6,7 @@ import MySQLdb
 app = Flask(__name__)
 
 # Configura la URI de la base de datos MySQL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://MrFerchoo:Jovencitos123@MrFerchoo.mysql.pythonanywhere-services.com:3306/MrFerchoo$Store'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://chemacruzp:123qweZXC@chemacruzp.mysql.pythonanywhere-services.com:3306/chemacruzp$default'
 
 # Inicializa la extensión SQLAlchemy
 db = SQLAlchemy(app)
@@ -16,19 +16,21 @@ class Store(db.Model):
     idStore = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     lat = db.Column(db.String(20))
-    lon = db.Column(db.String(20))
+    lng = db.Column(db.String(20))
+    
+# Define el modelo de datos Product
+class Product(db.Model):
+    idProduct = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String(200))
+    name = db.Column(db.String(100))
 
-"""host = 'MrFerchoo.mysql.pythonanywhere-services.com'
-user = 'MrFerchoo'
-password = 'Jovencitos123'
-database = 'MrFerchoo$Store'
-
-connection = MySQLdb.connect(host=host, user=user, password=password, database=database)
-
-cursor = connection.cursor()
-cursor.execute("SELECT * FROM store")
-data = cursor.fetchall()
-"""
+# Define el modelo de datos Detalle
+class Detail(db.Model):
+    idDetalle = db.Column(db.Integer, primary_key=True)
+    idProduct = db.Column(db.Integer)
+    idStore = db.Column(db.Integer)
+    price = db.Column(db.Float)
+    idStock = db.Column(db.Integer)
 
 #   Rutas
 @app.route('/')   #esto sal escribiendo route y tab
@@ -83,7 +85,7 @@ def nearest_stores():
     # Consulta las tiendas desde la base de datos
     stores = (
         db.session.query(Store)
-        .with_entities(Store.name, Store.lat, Store.lon)  # Ajusté 'Store.long' a 'Store.lon'
+        .with_entities(Store.name, Store.lat, Store.lng)
         .all()
     )
 
@@ -91,11 +93,10 @@ def nearest_stores():
     distances = []
     for store in stores:
         store_lat = float(store.lat)
-        store_lon = float(store.lon)  # Ajusté 'store.long' a 'store.lon'
+        store_lon = float(store.lng)  
         distance = great_circle((user_lat, user_lon), (store_lat, store_lon)).km
         distances.append((store.name, distance))
 
-    # Ordena las tiendas por distancia y selecciona las 'num_sucursales' más cercanas
     nearest_stores = sorted(distances, key=lambda x: x[1])[:num_sucursales]
 
     # Devuelve las tiendas más cercanas en formato JSON
