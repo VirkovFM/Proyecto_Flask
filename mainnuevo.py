@@ -6,7 +6,11 @@ import MySQLdb
 app = Flask(__name__)
 
 # Configura la URI de la base de datos MySQL
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://chemacruzp:123qweZXC@chemacruzp.mysql.pythonanywhere-services.com:3306/chemacruzp$default'
+    #   Conexion Profe
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://chemacruzp:123qweZXC@chemacruzp.mysql.pythonanywhere-services.com:3306/chemacruzp$default'
+    #   Mi Conexion
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://MrFerchoo:Jovencitos123@MrFerchoo.mysql.pythonanywhere-services.com/MrFerchoo$Store'
+
 
 # Inicializa la extensión SQLAlchemy
 db = SQLAlchemy(app)
@@ -95,7 +99,7 @@ def nearest_stores():
     distances = []
     for store in stores:
         store_lat = float(store.lat)
-        store_lon = float(store.lng)  
+        store_lon = float(store.lng)
         distance = great_circle((user_lat, user_lon), (store_lat, store_lon)).km
         distances.append((store.name, distance))
 
@@ -105,5 +109,81 @@ def nearest_stores():
     result = [{'name': store[0], 'distance_km': store[1]} for store in nearest_stores]
     return jsonify(result)
 
+    #   Obtener el producto por tiendas(Json)
+@app.route('/product', methods=['POST'])
+def get_stores_by_product():
+    try:
+        data = request.json
+        product_id = int(data.get('idProduct'))
+    except (ValueError, TypeError):
+        return jsonify({'error': 'ID de producto no proporcionado o no válido'}), 400
+
+    if product_id is None:
+        return jsonify({'error': 'ID de producto no proporcionado'}), 400
+
+    # Consulta las tiendas desde la base de datos
+    stores = (
+        db.session.query(Store)
+        .join(Detail)
+        .filter(Detail.idProduct == product_id)
+        .with_entities(Store.idStore, Store.name, Store.lat, Store.lng)
+        .all()
+    )
+
+    # Devuelve las tiendas asociadas al producto en formato JSON
+    result = [{'idStore': store.idStore, 'name': store.name, 'lat': store.lat, 'lng': store.lng} for store in stores]
+    return jsonify(result)
+
+
+    #   Obtener el producto por tiendas(Ruta)
+@app.route('/product_rute/<int:idProduct>', methods=['POST'])
+def get_product_stores(idProduct):
+    try:
+        product = Product.query.get(idProduct)
+
+        if product is None:
+            return jsonify({"error": f"No se encontró el producto con ID {idProduct}"}), 404
+
+        stores = [
+            {
+                "idStore": detail.store.idStore,
+                "lat": detail.store.lat,
+                "lng": detail.store.lng,
+                "name": detail.store.name
+            }
+            for detail in product.details
+        ]
+
+        result = {"idProduct": idProduct, "stores": stores}
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    #   Obtener productos por tienda
+@app.route('/product_store/<int:idStore>', methods=['GET'])
+def get_store_products(idStore):
+    try:
+        store = Store.query.get(idStore)
+
+        if store is None:
+            return jsonify({"error": f"No se encontró la tienda con ID {idStore}"}), 404
+
+        products = [
+            {
+                "idProduct": detail.product.idProduct,
+                "name": detail.product.name,
+                "description": detail.product.description,
+                "price": detail.price,
+                "idStock": detail.idStock
+            }
+            for detail in store.details
+        ]
+
+        result = {"idStore": idStore, "name": store.name, "products": products}
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 if __name__ == '__main__':
     app.run(debug=True)
